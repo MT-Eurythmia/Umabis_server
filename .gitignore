@@ -1,2 +1,4 @@
 logs/access.log
 logs/errors.log
+vendor/
+
