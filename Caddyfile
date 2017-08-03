@@ -5,11 +5,18 @@ localhost:80 {
 	log logs/access.log
 	# errors log file
 	errors logs/errors.log
-	
+
 	# our root is in www/
 	root public/
 	# allow to list directories files
 	browse
 	# redirect .php files
         fastcgi / /run/php-fpm/php-fpm.sock php
+	# rewrite everything to /index.php
+	# the bullet framework needs the original URL to be given in the 'u'
+	# parameter of the GET request
+	rewrite / {
+		regexp (.*)
+		to /index.php?u={1}
+	}
 }
