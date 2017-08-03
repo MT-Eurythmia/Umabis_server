@@ -1,8 +1,10 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+require __DIR__ . '/../src/config.php';
+
 try {
-	$db = new PDO('mysql:host=localhost;dbname=umabis;charset=utf8', 'umabis', 'iuR03JPGFaLsayL5');
+	$db = new PDO('mysql:host='.DB_HOST.';dbname='.DB_NAME.';charset=utf8', DB_USER, DB_PASS);
 } catch (Exception $e) {
 	die('Error while getting access to database: ' . $e->getMessage());
 }
