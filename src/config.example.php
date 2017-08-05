@@ -9,3 +9,4 @@ define('DB_PASS', 'iuR03JPGFaLsayL5');
  * set the client ping frequency accordingly.
  */
 define('SESSION_EXPIRATION_TIME', 3*60);
+define('SESSION_TOKEN_LENGTH', 64);

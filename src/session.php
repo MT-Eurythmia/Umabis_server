@@ -55,8 +55,7 @@ function generate_token() {
 	$codeAlphabet.= "0123456789";
 	$max = strlen($codeAlphabet);
 
-	// The token length is 64 characters
-	for ($i=0; $i < 64; $i++) {
+	for ($i=0; $i < SESSION_TOKEN_LENGTH; $i++) {
 		$token .= $codeAlphabet[random_int(0, $max-1)];
 	}
 
