@@ -1,5 +1,5 @@
 logs/access.log
 logs/errors.log
 vendor/
-src/dbconfig.php
-
+composer.lock
+src/config.php
