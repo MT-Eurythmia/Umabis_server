@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Aug 05, 2017 at 07:43 PM
+-- Generation Time: Aug 06, 2017 at 04:34 PM
 -- Server version: 10.1.25-MariaDB
 -- PHP Version: 7.1.8
 
@@ -68,8 +68,7 @@ CREATE TABLE `blacklist_entries` (
 --
 
 CREATE TABLE `global_moderators` (
-  `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `blacklist_wrong_pass` tinyint(1) NOT NULL
+  `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -94,7 +93,7 @@ CREATE TABLE `servers` (
 CREATE TABLE `sessions` (
   `token` varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `expiration_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `expiration_time` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

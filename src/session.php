@@ -13,9 +13,9 @@ function close_session($nick) {
 }
 
 /* Return values:
- * 1: user is not authenticated
- * 2: the token does not match
- * 3: the session expired
+ * 14: user is not authenticated
+ * 6: the token does not match
+ * 13: the session expired
  */
 function get_session($nick, $token = NULL) {
 	global $db;
@@ -25,21 +25,24 @@ function get_session($nick, $token = NULL) {
 	$session = $req->fetch();
 
 	if (empty($session)) {
-		return 1;
+		return 14;
 	}
 
 	if ($token != NULL && $session['token'] !== $token) {
-		return 2;
+		return 6;
 	}
 
 	if ($session['exp_time_UNIX'] <= time()) {
 		close_session($nick);
-		return 3;
+		return 13;
 	}
 
 	// Update the expiration time
-	$req = $db->prepare('UPDATE sessions SET expiration_time = NOW() + ? WHERE nick = ?');
-	$req->execute(array(SESSION_EXPIRATION_TIME, $nick));
+	$req = $db->prepare('UPDATE sessions SET expiration_time = DATE_ADD(NOW(), INTERVAL :expiration_time SECOND) WHERE nick = :nick');
+	$req->execute(array(
+		'expiration_time' => SESSION_EXPIRATION_TIME,
+		'nick' => $nick
+	));
 
 	return $session;
 }
@@ -69,15 +72,9 @@ function create_session($nick) {
 		return 1;
 	}
 
-	$session = array(
-		'nick' => $nick,
-		'token' => generate_token(),
-		'expiration_time' => SESSION_EXPIRATION_TIME
-	);
-
 	$token = generate_token();
 
-	$req = $db->prepare('INSERT INTO sessions(nick, token, expiration_time) VALUES(:nick, :token, NOW() + :expiration_time)');
+	$req = $db->prepare('INSERT INTO sessions(nick, token, expiration_time) VALUES(:nick, :token, DATE_ADD(NOW(), INTERVAL :expiration_time SECOND))');
 	$req->execute(array(
 		'nick' => $nick,
 		'token' => $token,
