@@ -15,6 +15,22 @@ $app = new Bullet\App();
 
 require __DIR__ . '/../src/session.php';
 
+function command_wrapper($request, $action) {
+	$name = $request->post('name');
+	$token = $request->post('token');
+	if (!$name || !$token)
+		return '012';
+	$session = Session\get_session($name, $token);
+	if (is_int($session))
+		return sprintf('%03d', $session);
+
+	$ret = $action($name);
+	if ($ret)
+		return (string) $ret;
+
+	return '000';
+}
+
 $app->path('api', function($request) use($app, $db) {
 	$app->path('authenticate', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
@@ -49,7 +65,7 @@ $app->path('api', function($request) use($app, $db) {
 
 			// Check that the hash matches
 			if ($hash != $user['password_hash']) {
-				return 002;
+				return '002';
 			}
 
 			// TODO: check the number of failing authentication attempts
@@ -62,6 +78,13 @@ $app->path('api', function($request) use($app, $db) {
 			}
 
 			return '000' . $token;
+		});
+	});
+	$app->path('close_session', function($request) use($app, $db) {
+		$app->post(function($request) use($db) {
+			return command_wrapper($request, function($name) {
+				Session\close_session($name);
+			});
 		});
 	});
 });
