@@ -34,9 +34,14 @@ function command_wrapper($request, $action) {
 $app->path('api', function($request) use($app, $db) {
 	$app->path('authenticate', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
-			$hash = $request->post('hash');
+			/*$hash = $request->post('hash');
 			$name = $request->post('name');
-			$ip_address = $request->post('ip_address');
+			$ip_address = $request->post('ip_address');*/
+			$hash = $_POST['hash'];
+			$name = $_POST['name'];
+			$ip_address = $_POST['ip_address'];
+
+			echo "$hash<br>$name<br>$ip_address<br>";
 
 			// Check request validity
 			if (!$hash || !$name || !$ip_address) {
@@ -84,6 +89,13 @@ $app->path('api', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
 			return command_wrapper($request, function($name) {
 				Session\close_session($name);
+			});
+		});
+	});
+	$app->patch('ping', function($request) use ($app, $db) {
+		$app->post(function($request) use($db) {
+			return command_wrapper($request, function($name) {
+				// Do nothing more :p
 			});
 		});
 	});
