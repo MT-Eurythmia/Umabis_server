@@ -1,6 +1,7 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+define('VERSION', '0.0.0');
 
+require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/config.php';
 
 try {
@@ -137,7 +138,8 @@ $app->path('api', function($request) use($app, $db) {
 	$app->path('hello', function($request) use ($app) {
 		$app->get(function($request) {
 			return '000' . json_encode(array(
-				'SESSION_EXPIRATION_TIME' => SESSION_EXPIRATION_TIME
+				'SESSION_EXPIRATION_TIME' => SESSION_EXPIRATION_TIME,
+				'VERSION' => VERSION
 			));
 		});
 	});
