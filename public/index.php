@@ -17,7 +17,7 @@ $app = new Bullet\App();
 require __DIR__ . '/../src/session.php';
 
 function command_wrapper($request, $action) {
-	$name = $request->post('name');
+	$name = strtolower($request->post('name', ''));
 	$token = $request->post('token');
 	if (!$name || !$token)
 		return '012';
@@ -35,7 +35,7 @@ function command_wrapper($request, $action) {
 $app->path('api', function($request) use($app, $db) {
 	$app->path('register', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
-			$name = $request->post('name');
+			$name = strtolower($request->post('name', ''));
 			$hash = $request->post('hash');
 			$email = $request->post('e-mail');
 			$is_email_public = (int) $request->post('is_email_public', '1');
@@ -74,7 +74,7 @@ $app->path('api', function($request) use($app, $db) {
 	$app->path('authenticate', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
 			$hash = $request->post('hash');
-			$name = $request->post('name');
+			$name = strtolower($request->post('name', ''));
 			$ip_address = $request->post('ip_address');
 
 			// Check request validity
@@ -128,19 +128,67 @@ $app->path('api', function($request) use($app, $db) {
 			});
 		});
 	});
-	$app->path('ping', function($request) use ($app, $db) {
-		$app->post(function($request) use($db) {
-			return command_wrapper($request, function($name) {
-				// Do nothing more :p
-			});
-		});
-	});
 	$app->path('hello', function($request) use ($app) {
 		$app->get(function($request) {
 			return '000' . json_encode(array(
 				'SESSION_EXPIRATION_TIME' => SESSION_EXPIRATION_TIME,
 				'VERSION' => VERSION
 			));
+		});
+	});
+	$app->path('is_registered', function($request) use ($app, $db) {
+		$app->get(function($request) use ($db) {
+			$name = strtolower($request->get('name', ''));
+			$ip_address = $request->get('ip_address');
+
+			print_r($_GET);
+			if (!$name || !$ip_address)
+				return '012';
+
+			$req = $db->prepare('SELECT nick FROM users WHERE nick = ?');
+			$req->execute(array($name));
+
+			if ($req->rowCount() == 0) {
+				return '000' . '0'; // Not registered
+			} else {
+				$req = $db->prepare('SELECT nick FROM user_IPs WHERE nick = ? AND IP_address = ?');
+				$req->execute(array($name, $ip_address));
+
+				if ($req->rowCount() == 0)
+					return '000' . '1'; // Registered but new IP
+				else
+					return '000' . '2'; // Registered and known IP
+			}
+		});
+	});
+	$app->path('is_blacklisted', function($request) use ($app, $db) {
+		$app->get(function($request) use ($db) {
+			$name = strtolower($request->get('name', ''));
+			$ip_address = $request->get('ip_address');
+
+			if (!$name && !$ip_address)
+				return '012';
+
+			if ($name) {
+				$blacklist_entry_nick = Blacklist\get_entry_nick($name);
+				if (!empty($blacklist_entry_nick))
+					return '000' . '1' . json_encode($blacklist_entry_nick);
+			}
+
+			if ($ip_address) {
+				$blacklist_entry_ip = Blacklist\get_entry_ip($ip_address);
+				if (!empty($blacklist_entry_ip))
+					return '000' . '2' . json_encode($blacklist_entry_ip);
+			}
+
+			return '000' . '0';
+		});
+	});
+	$app->path('ping', function($request) use ($app, $db) {
+		$app->post(function($request) use($db) {
+			return command_wrapper($request, function($name) {
+				// Do nothing more :p
+			});
 		});
 	});
 });

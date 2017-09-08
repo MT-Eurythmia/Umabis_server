@@ -17,6 +17,6 @@ localhost:80 {
 	# parameter of the GET request
 	rewrite / {
 		regexp (.*)
-		to /index.php?u={1}
+		to /index.php?u={1}&{query}
 	}
 }
