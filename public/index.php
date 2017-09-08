@@ -132,7 +132,8 @@ $app->path('api', function($request) use($app, $db) {
 		$app->get(function($request) {
 			return '000' . json_encode(array(
 				'SESSION_EXPIRATION_TIME' => SESSION_EXPIRATION_TIME,
-				'VERSION' => VERSION
+				'VERSION' => VERSION,
+				'NAME' => NAME
 			));
 		});
 	});

@@ -10,3 +10,6 @@ define('DB_PASS', 'iuR03JPGFaLsayL5');
  */
 define('SESSION_EXPIRATION_TIME', 3*60);
 define('SESSION_TOKEN_LENGTH', 64);
+/* The name of the Umabis server, as sent to the client.
+ */
+define('NAME', 'Eurythmia');
