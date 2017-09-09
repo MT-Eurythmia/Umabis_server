@@ -22,3 +22,53 @@ function get_entry_nick($nick) {
 	$req->execute(array($nick));
 	return $req->fetchAll();
 }
+
+function blacklist_user($nick, $source_moderator, $reason, $category, $time) {
+	global $db;
+
+	// Check that the user exists
+	$req = $db->prepare('SELECT * FROM users WHERE nick = ?');
+	$req->execute(array($nick));
+	if ($req->rowCount() == 0)
+		return 9;
+
+	// Check that the user is not already blacklisted
+	$req = $db->prepare('SELECT * FROM blacklist_entries WHERE nick = ?');
+	$req->execute(array($nick));
+	if ($req->rowCount() != 0)
+		return 10;
+
+	// Check that the category is valid
+	$req = $db->prepare('SELECT * FROM blacklisting_categories WHERE category = ?');
+	$req->execute(array($category));
+	if ($req->rowCount() == 0)
+		return 11;
+
+	if ($time) {
+		$req = $db->prepare('INSERT INTO blacklist_entries(nick, date, source_moderator, reason, category, expiration_time) VALUES(:nick, NOW(), :source_moderator, :reason, :category, DATE_ADD(NOW(), INTERVAL :time SECOND))');
+		$req->execute(array(
+			'nick' => $nick,
+			'source_moderator' => $source_moderator,
+			'reason' => $reason,
+			'category' => $category,
+			'time' => $time
+		));
+	} else {
+		$req = $db->prepare('INSERT INTO blacklist_entries(nick, date, source_moderator, reason, category) VALUES(:nick, NOW(), :source_moderator, :reason, :category)');
+		$req->execute(array(
+			'nick' => $nick,
+			'source_moderator' => $source_moderator,
+			'reason' => $reason,
+			'category' => $category
+		));
+	}
+}
+
+function unblacklist_user($nick) {
+	global $db;
+
+	$req = $db->prepare('DELETE FROM blacklist_entries WHERE nick = ?');
+	$deleted_count = $req->execute(array($nick));
+	if ($deleted_count == 0)
+		return 10;
+}

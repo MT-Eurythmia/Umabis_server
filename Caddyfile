@@ -1,4 +1,4 @@
-localhost:80 {
+localhost:81 {
 	# compress stream
 	gzip
 	# access log file

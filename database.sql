@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 09, 2017 at 03:00 PM
+-- Generation Time: Sep 09, 2017 at 04:28 PM
 -- Server version: 10.1.26-MariaDB
 -- PHP Version: 7.1.8
 
@@ -55,10 +55,10 @@ CREATE TABLE `blacklist_entries` (
   `ID` int(10) UNSIGNED NOT NULL,
   `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `date` datetime NOT NULL,
-  `source_server` int(10) UNSIGNED NOT NULL,
   `source_moderator` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `reason` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `category` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL
+  `category` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `expiration_time` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -138,12 +138,8 @@ ALTER TABLE `blacklisting_categories`
 --
 ALTER TABLE `blacklist_entries`
   ADD PRIMARY KEY (`ID`),
-  ADD UNIQUE KEY `source_server` (`source_server`),
   ADD UNIQUE KEY `source_moderator` (`source_moderator`),
   ADD KEY `nick` (`nick`),
-  ADD KEY `nick_2` (`nick`),
-  ADD KEY `source_moderator_2` (`source_moderator`),
-  ADD KEY `nick_3` (`nick`),
   ADD KEY `category` (`category`);
 
 --
@@ -201,7 +197,6 @@ ALTER TABLE `servers`
 -- Constraints for table `blacklist_entries`
 --
 ALTER TABLE `blacklist_entries`
-  ADD CONSTRAINT `blacklist_entries_ibfk_3` FOREIGN KEY (`source_server`) REFERENCES `servers` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `blacklist_entries_ibfk_4` FOREIGN KEY (`nick`) REFERENCES `users` (`nick`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `blacklist_entries_ibfk_5` FOREIGN KEY (`category`) REFERENCES `blacklisting_categories` (`category`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 

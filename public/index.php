@@ -33,6 +33,21 @@ function command_wrapper($request, $action) {
 	return '000';
 }
 
+function privileged_command_wrapper($request, $action) {
+	global $db;
+
+	return command_wrapper($request, function($name) use ($db, $action) {
+		$req = $db->prepare('SELECT * FROM global_moderators WHERE nick = ?');
+		$req->execute(array($name));
+		if ($req->rowCount() == 0)
+			return '008';
+
+		$ret = $action($name);
+		if ($ret)
+			return (string) $ret;
+	});
+}
+
 $app->path('api', function($request) use($app, $db) {
 	$app->path('register', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
@@ -243,7 +258,7 @@ $app->path('api', function($request) use($app, $db) {
 	$app->path('get_user_info', function($request) use ($app, $db) {
 		$app->get(function($request) use ($db) {
 			return command_wrapper($request, function($name) use ($request, $db) {
-				$requested_name = $request->query('requested_name');
+				$requested_name = strtolower($request->query('requested_name', ''));
 				if (!$requested_name)
 					return '012';
 
@@ -252,6 +267,9 @@ $app->path('api', function($request) use($app, $db) {
 
 				$response = array();
 				$entry = $req->fetch();
+				if (!$entry)
+					return '009';
+
 				if ($entry['is_email_public'])
 					$response['email'] = $entry['email'];
 				$response['language_main'] = $entry['language_main'];
@@ -259,6 +277,37 @@ $app->path('api', function($request) use($app, $db) {
 				$response['language_fallback_2'] = $entry['language_fallback_2'];
 
 				return '000' . json_encode($response);
+			});
+		});
+	});
+	$app->path('blacklist_user', function($request) use ($app, $db) {
+		$app->post(function($request) use ($db) {
+			return privileged_command_wrapper($request, function($name) use ($request) {
+				$blacklisted_name = strtolower($request->post('blacklisted_name', ''));
+				$reason = $request->post('reason');
+				$category = $request->post('category');
+				$time = $request->post('time');
+
+				if (!$blacklisted_name || !$reason || !$category)
+					return '012';
+
+				$ret = Blacklist\blacklist_user($blacklisted_name, $name, $reason, $category, $time);
+				if ($ret)
+					return sprintf('%03d', $ret);
+			});
+		});
+	});
+	$app->path('unblacklist_user', function($request) use ($app, $db) {
+		$app->post(function($request) use ($db) {
+			return privileged_command_wrapper($request, function($name) use ($request) {
+				$blacklisted_name = $request->post('blacklisted_name');
+
+				if (!$blacklisted_name)
+					return '012';
+
+				$ret = Blacklist\unblacklist_user($blacklisted_name);
+				if ($ret)
+					return sprintf('%03d', $ret);
 			});
 		});
 	});
