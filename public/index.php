@@ -17,10 +17,11 @@ $app = new Bullet\App();
 require __DIR__ . '/../src/session.php';
 
 function command_wrapper($request, $action) {
-	$name = strtolower($request->post('name', ''));
-	$token = $request->post('token');
+	$name = strtolower($request->get('name', ''));
+	$token = $request->get('token');
 	if (!$name || !$token)
 		return '012';
+
 	$session = Session\get_session($name, $token);
 	if (is_int($session))
 		return sprintf('%03d', $session);
@@ -139,10 +140,9 @@ $app->path('api', function($request) use($app, $db) {
 	});
 	$app->path('is_registered', function($request) use ($app, $db) {
 		$app->get(function($request) use ($db) {
-			$name = strtolower($request->get('name', ''));
-			$ip_address = $request->get('ip_address');
+			$name = strtolower($request->query('name', ''));
+			$ip_address = $request->query('ip_address');
 
-			print_r($_GET);
 			if (!$name || !$ip_address)
 				return '012';
 
@@ -164,8 +164,8 @@ $app->path('api', function($request) use($app, $db) {
 	});
 	$app->path('is_blacklisted', function($request) use ($app, $db) {
 		$app->get(function($request) use ($db) {
-			$name = strtolower($request->get('name', ''));
-			$ip_address = $request->get('ip_address');
+			$name = strtolower($request->query('name', ''));
+			$ip_address = $request->query('ip_address');
 
 			if (!$name && !$ip_address)
 				return '012';
@@ -189,6 +189,53 @@ $app->path('api', function($request) use($app, $db) {
 		$app->post(function($request) use($db) {
 			return command_wrapper($request, function($name) {
 				// Do nothing more :p
+			});
+		});
+	});
+	$app->path('set_pass', function($request) use ($app, $db) {
+		$app->post(function($request) use ($db) {
+			return command_wrapper($request, function($name) use ($request, $db) {
+				$hash = $request->post('hash');
+				if (!$hash)
+					return '012';
+
+				$req = $db->prepare('UPDATE users SET password_hash = ? WHERE nick = ?');
+				$req->execute(array($hash, $name));
+
+				return '000';
+			});
+		});
+	});
+	$app->path('set_info', function($request) use ($app, $db) {
+		$app->post(function($request) use ($db) {
+			return command_wrapper($request, function($name) use ($request, $db) {
+				$email = $request->post('e-mail');
+				if (!$email)
+					return '012';
+
+				if ($email) {
+					$req = $db->prepare('UPDATE users SET email = ? WHERE nick = ?');
+					$req->execute(array($email, $name));
+				}
+			});
+		});
+	});
+	$app->path('get_user_info', function($request) use ($app, $db) {
+		$app->get(function($request) use ($db) {
+			return command_wrapper($request, function($name) use ($request, $db) {
+				$requested_name = $request->query('requested_name');
+				if (!$requested_name)
+					return '012';
+
+				$req = $db->prepare('SELECT * FROM users WHERE nick = ?');
+				$req->execute(array($requested_name));
+
+				$response = array();
+				$entry = $req->fetch();
+				if ($entry['is_email_public'])
+					$response['email'] = $entry['email'];
+
+				return '000' . json_encode($response);
 			});
 		});
 	});
