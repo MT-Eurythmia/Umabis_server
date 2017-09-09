@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Aug 06, 2017 at 04:34 PM
--- Server version: 10.1.25-MariaDB
+-- Generation Time: Sep 09, 2017 at 03:00 PM
+-- Server version: 10.1.26-MariaDB
 -- PHP Version: 7.1.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -106,6 +106,9 @@ CREATE TABLE `users` (
   `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `email` text CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `is_email_public` tinyint(1) NOT NULL DEFAULT '1',
+  `language_main` tinytext CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `language_fallback_1` tinytext CHARACTER SET ascii COLLATE ascii_bin,
+  `language_fallback_2` tinytext CHARACTER SET ascii COLLATE ascii_bin,
   `password_hash` text CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

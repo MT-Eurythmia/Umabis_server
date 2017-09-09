@@ -41,9 +41,12 @@ $app->path('api', function($request) use($app, $db) {
 			$email = $request->post('e-mail');
 			$is_email_public = (int) $request->post('is_email_public', '1');
 			$ip_address = $request->post('ip_address');
+			$language_main = $request->post('language_main');
+			$language_fallback_1 = $request->post('language_fallback_1', NULL);
+			$language_fallback_2 = $request->post('language_fallback_2', NULL);
 
 			// Check request validity
-			if (!$hash || !$name || !$email || !$ip_address)
+			if (!$hash || !$name || !$email || !$ip_address || !$language_main)
 				return '012';
 
 			// Make sure that the account does not already exists
@@ -58,11 +61,14 @@ $app->path('api', function($request) use($app, $db) {
 				return '005' . json_encode($blacklist_entry_ip);
 
 			// Register the user
-			$req = $db->prepare('INSERT INTO users(nick, email, is_email_public, password_hash) VALUES(:nick, :email, :is_email_public, :hash)');
+			$req = $db->prepare('INSERT INTO users(nick, email, is_email_public, language_main, language_fallback_1, language_fallback_2, password_hash) VALUES(:nick, :email, :is_email_public, :language_main, :language_fallback_1, :language_fallback_2, :hash)');
 			$req->execute(array(
 				'nick' => $name,
 				'email' => $email,
 				'is_email_public' => $is_email_public,
+				'language_main' => $language_main,
+				'language_fallback_1' => $language_fallback_1,
+				'language_fallback_2' => $language_fallback_2,
 				'hash' => $hash
 			));
 
@@ -79,19 +85,17 @@ $app->path('api', function($request) use($app, $db) {
 			$ip_address = $request->post('ip_address');
 
 			// Check request validity
-			if (!$hash || !$name || !$ip_address) {
+			if (!$hash || !$name || !$ip_address)
 				return '012';
-			}
 
 			// Make sure that the user is not blacklisted
 			$blacklist_entry_nick = Blacklist\get_entry_nick($name);
-			if (!empty($blacklist_entry_nick)) {
+			if (!empty($blacklist_entry_nick))
 				return '005' . json_encode($blacklist_entry_nick);
-			}
+
 			$blacklist_entry_ip = Blacklist\get_entry_ip($ip_address);
-			if (!empty($blacklist_entry_ip)) {
+			if (!empty($blacklist_entry_ip))
 				return '005' . json_encode($blacklist_entry_ip);
-			}
 
 			$req = $db->prepare('SELECT * FROM users WHERE nick = ?');
 			$req->execute(array($name));
@@ -210,12 +214,28 @@ $app->path('api', function($request) use($app, $db) {
 		$app->post(function($request) use ($db) {
 			return command_wrapper($request, function($name) use ($request, $db) {
 				$email = $request->post('e-mail');
-				if (!$email)
+				$language_main = $request->post('language_main');
+				$language_fallback_1 = $request->post('language_fallback_1');
+				$language_fallback_2 = $request->post('language_fallback_2');
+
+				if (!$email && !$language_main && !$language_fallback_1 && !$language_fallback_2)
 					return '012';
 
 				if ($email) {
 					$req = $db->prepare('UPDATE users SET email = ? WHERE nick = ?');
 					$req->execute(array($email, $name));
+				}
+				if ($language_main) {
+					$req = $db->prepare('UPDATE users SET language_main = ? WHERE nick = ?');
+					$req->execute(array($language_main, $name));
+				}
+				if ($language_fallback_1) {
+					$req = $db->prepare('UPDATE users SET language_fallback_1 = ? WHERE nick = ?');
+					$req->execute(array($language_fallback_1, $name));
+				}
+				if ($language_fallback_2) {
+					$req = $db->prepare('UPDATE users SET language_fallback_2 = ? WHERE nick = ?');
+					$req->execute(array($language_fallback_2, $name));
 				}
 			});
 		});
@@ -234,6 +254,9 @@ $app->path('api', function($request) use($app, $db) {
 				$entry = $req->fetch();
 				if ($entry['is_email_public'])
 					$response['email'] = $entry['email'];
+				$response['language_main'] = $entry['language_main'];
+				$response['language_fallback_1'] = $entry['language_fallback_1'];
+				$response['language_fallback_2'] = $entry['language_fallback_2'];
 
 				return '000' . json_encode($response);
 			});
