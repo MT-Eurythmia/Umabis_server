@@ -1,6 +1,8 @@
 <?php
 namespace Blacklist;
 
+// TODO: check expiration time
+
 function get_entry_ip($ip) {
 	global $db;
 
@@ -37,6 +39,10 @@ function blacklist_user($nick, $source_moderator, $reason, $category, $time) {
 	$req->execute(array($nick));
 	if ($req->rowCount() != 0)
 		return 10;
+
+	// Check that the user is not whitelisted
+	if (\Whitelist\is_whitelisted($nick))
+		return 16;
 
 	// Check that the category is valid
 	$req = $db->prepare('SELECT * FROM blacklisting_categories WHERE category = ?');

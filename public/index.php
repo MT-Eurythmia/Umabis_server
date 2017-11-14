@@ -10,6 +10,7 @@ try {
 	die('Error while getting access to database: ' . $e->getMessage());
 }
 
+require __DIR__ . '/../src/whitelist.php';
 require __DIR__ . '/../src/blacklist.php';
 
 $app = new Bullet\App();
@@ -37,9 +38,8 @@ function privileged_command_wrapper($request, $action) {
 	global $db;
 
 	return command_wrapper($request, function($name) use ($db, $action) {
-		$req = $db->prepare('SELECT * FROM global_moderators WHERE nick = ?');
-		$req->execute(array($name));
-		if ($req->rowCount() == 0)
+		// Check privileges
+		if (!Whitelist\is_whitelisted($name))
 			return '008';
 
 		$ret = $action($name);
@@ -306,6 +306,34 @@ $app->path('api', function($request) use($app, $db) {
 					return '012';
 
 				$ret = Blacklist\unblacklist_user($blacklisted_name);
+				if ($ret)
+					return sprintf('%03d', $ret);
+			});
+		});
+	});
+	$app->path('whitelist_user', function($request) use ($app, $db) {
+		$app->post(function($request) use ($db) {
+			return privileged_command_wrapper($request, function($name) use ($request) {
+				$whitelisted_name = $request->post('whitelisted_name');
+
+				if (!$whitelisted_name)
+					return '012';
+
+				$ret = Whitelist\whitelist_user($whitelisted_name);
+				if ($ret)
+					return sprintf('%03d', $ret);
+			});
+		});
+	});
+	$app->path('unwhitelist_user', function($request) use ($app, $db) {
+		$app->post(function($request) use ($db) {
+			return privileged_command_wrapper($request, function($name) use ($request) {
+				$whitelisted_name = $request->post('whitelisted_name');
+
+				if (!$whitelisted_name)
+					return '012';
+
+				$ret = Whitelist\unwhitelist_user($whitelisted_name);
 				if ($ret)
 					return sprintf('%03d', $ret);
 			});
