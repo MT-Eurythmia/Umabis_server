@@ -148,12 +148,18 @@ $app->path('api', function($request) use($app, $db) {
 			});
 		});
 	});
-	$app->path('hello', function($request) use ($app) {
-		$app->get(function($request) {
+	$app->path('hello', function($request) use ($app, $db) {
+		$app->get(function($request) use ($db) {
+			$available_categories = array();
+			$req = $db->query('SELECT * FROM blacklisting_categories');
+			while ($entry = $req->fetch())
+				$available_categories[$entry['category']] = $entry['description'];
+
 			return '000' . json_encode(array(
 				'SESSION_EXPIRATION_TIME' => SESSION_EXPIRATION_TIME,
 				'VERSION' => VERSION,
-				'NAME' => NAME
+				'NAME' => NAME,
+				'AVAILABLE_BLACKLIST_CATEGORIES' => $available_categories
 			));
 		});
 	});
