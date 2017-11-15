@@ -33,7 +33,7 @@ function whitelist_user($nick) {
 		return 10;
 
 	// Check that the user is not blacklisted
-	$blacklist_entry_nick = Blacklist\get_entry_nick($name);
+	$blacklist_entry_nick = \Blacklist\get_entry_nick($nick);
 	if (!empty($blacklist_entry_nick))
 		return 16;
 
