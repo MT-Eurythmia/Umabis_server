@@ -74,7 +74,7 @@ function unblacklist_user($nick) {
 	global $db;
 
 	$req = $db->prepare('DELETE FROM blacklist_entries WHERE nick = ?');
-	$deleted_count = $req->execute(array($nick));
-	if ($deleted_count == 0)
+	$req->execute(array($nick));
+	if ($req->rowCount() == 0)
 		return 10;
 }
