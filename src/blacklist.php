@@ -1,8 +1,6 @@
 <?php
 namespace Blacklist;
 
-// TODO: check expiration time
-
 function get_entry_ip($ip) {
 	global $db;
 
@@ -20,9 +18,18 @@ function get_entry_ip($ip) {
 function get_entry_nick($nick) {
 	global $db;
 
-	$req = $db->prepare('SELECT * FROM blacklist_entries WHERE nick = ?');
+	$req = $db->prepare('SELECT ID, nick, date, source_moderator, reason, category, UNIX_TIMESTAMP(expiration_time) as exp_time_UNIX FROM blacklist_entries WHERE nick = ?');
 	$req->execute(array($nick));
-	return $req->fetchAll();
+	$entry = $req->fetch();
+
+	if (!$entry)
+		return null;
+
+	if ($entry['exp_time_UNIX'] && $entry['exp_time_UNIX'] <= time()) {
+		unblacklist_user($nick);
+		return null;
+	}
+	return $entry;
 }
 
 function blacklist_user($nick, $source_moderator, $reason, $category, $time) {

@@ -72,7 +72,7 @@ $app->path('api', function($request) use($app, $db) {
 
 			// Make sure that the IP is not blacklisted
 			$blacklist_entry_ip = Blacklist\get_entry_ip($ip_address);
-			if (!empty($blacklist_entry_ip))
+			if ($blacklist_entry_ip)
 				return '005' . json_encode($blacklist_entry_ip);
 
 			// Register the user
@@ -105,11 +105,11 @@ $app->path('api', function($request) use($app, $db) {
 
 			// Make sure that the user is not blacklisted
 			$blacklist_entry_nick = Blacklist\get_entry_nick($name);
-			if (!empty($blacklist_entry_nick))
+			if ($blacklist_entry_nick)
 				return '005' . json_encode($blacklist_entry_nick);
 
 			$blacklist_entry_ip = Blacklist\get_entry_ip($ip_address);
-			if (!empty($blacklist_entry_ip))
+			if ($blacklist_entry_ip)
 				return '005' . json_encode($blacklist_entry_ip);
 
 			$req = $db->prepare('SELECT * FROM users WHERE nick = ?');
@@ -202,13 +202,13 @@ $app->path('api', function($request) use($app, $db) {
 
 			if ($name) {
 				$blacklist_entry_nick = Blacklist\get_entry_nick($name);
-				if (!empty($blacklist_entry_nick))
+				if ($blacklist_entry_nick)
 					return '000' . '1' . json_encode($blacklist_entry_nick);
 			}
 
 			if ($ip_address) {
 				$blacklist_entry_ip = Blacklist\get_entry_ip($ip_address);
-				if (!empty($blacklist_entry_ip))
+				if ($blacklist_entry_ip)
 					return '000' . '2' . json_encode($blacklist_entry_ip);
 			}
 
