@@ -116,9 +116,8 @@ $app->path('api', function($request) use($app, $db) {
 			$req->execute(array($name));
 
 			// Make sure that the user is registered
-			if ($req->rowCount() == 0) {
+			if ($req->rowCount() == 0)
 				return '001';
-			}
 
 			$user = $req->fetch();
 
@@ -129,7 +128,13 @@ $app->path('api', function($request) use($app, $db) {
 
 			// TODO: check the number of failing authentication attempts
 
-			// TODO: add the IP to the user IPs
+			// Add the IP to the user IPs
+			$req = $db->prepare('SELECT * FROM user_IPs WHERE nick = ? AND IP_address = ?');
+			$req->execute(array($name, $ip_address));
+			if ($req->rowCount() == 0) {
+				$req = $db->prepare('INSERT INTO user_IPs(nick, IP_address) VALUES(?, ?)');
+				$req->execute(array($name, $ip_address));
+			}
 
 			// Create the session
 			$token = Session\create_session($user['nick']);

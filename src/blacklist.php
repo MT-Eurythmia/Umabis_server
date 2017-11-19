@@ -6,7 +6,7 @@ namespace Blacklist;
 function get_entry_ip($ip) {
 	global $db;
 
-	$req = $db->prepare('SELECT nick FROM blacklist_entries INTERSECT SELECT nick FROM user_IPs WHERE IP_address = ?');
+	$req = $db->prepare('SELECT nick FROM user_IPs WHERE IP_address = ? AND nick IN (SELECT nick FROM blacklist_entries)');
 	$req->execute(array($ip));
 
 	$ret = array();

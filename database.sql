@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 19, 2017 at 12:03 PM
+-- Generation Time: Nov 19, 2017 at 04:01 PM
 -- Server version: 10.1.28-MariaDB
 -- PHP Version: 7.1.11
 
@@ -119,6 +119,7 @@ CREATE TABLE `users` (
 --
 
 CREATE TABLE `user_IPs` (
+  `ID` int(11) NOT NULL,
   `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `IP_address` varchar(39) CHARACTER SET ascii COLLATE ascii_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -172,8 +173,9 @@ ALTER TABLE `users`
 -- Indexes for table `user_IPs`
 --
 ALTER TABLE `user_IPs`
-  ADD PRIMARY KEY (`nick`),
-  ADD KEY `IP_address` (`IP_address`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `IP_address` (`IP_address`),
+  ADD KEY `nick` (`nick`) USING BTREE;
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -190,6 +192,12 @@ ALTER TABLE `blacklist_entries`
 --
 ALTER TABLE `servers`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user_IPs`
+--
+ALTER TABLE `user_IPs`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
