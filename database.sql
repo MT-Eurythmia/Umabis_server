@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.7.3
+-- version 4.7.5
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 09, 2017 at 04:28 PM
--- Server version: 10.1.26-MariaDB
--- PHP Version: 7.1.8
+-- Generation Time: Nov 19, 2017 at 12:03 PM
+-- Server version: 10.1.28-MariaDB
+-- PHP Version: 7.1.11
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -184,11 +184,13 @@ ALTER TABLE `user_IPs`
 --
 ALTER TABLE `blacklist_entries`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
 --
 -- AUTO_INCREMENT for table `servers`
 --
 ALTER TABLE `servers`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
 --
 -- Constraints for dumped tables
 --
@@ -198,7 +200,8 @@ ALTER TABLE `servers`
 --
 ALTER TABLE `blacklist_entries`
   ADD CONSTRAINT `blacklist_entries_ibfk_4` FOREIGN KEY (`nick`) REFERENCES `users` (`nick`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `blacklist_entries_ibfk_5` FOREIGN KEY (`category`) REFERENCES `blacklisting_categories` (`category`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `blacklist_entries_ibfk_5` FOREIGN KEY (`category`) REFERENCES `blacklisting_categories` (`category`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `blacklist_entries_ibfk_6` FOREIGN KEY (`source_moderator`) REFERENCES `users` (`nick`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `global_moderators`
