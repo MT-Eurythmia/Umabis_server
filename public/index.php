@@ -271,18 +271,33 @@ $app->path('api', function($request) use($app, $db) {
 				$req = $db->prepare('SELECT * FROM users WHERE nick = ?');
 				$req->execute(array($requested_name));
 
-				$response = array();
-				$entry = $req->fetch();
-				if (!$entry)
+				$user_entry = $req->fetch();
+				if (!$user_entry)
 					return '009';
 
-				if ($entry['is_email_public'])
-					$response['email'] = $entry['email'];
-				$response['language_main'] = $entry['language_main'];
-				$response['language_fallback_1'] = $entry['language_fallback_1'];
-				$response['language_fallback_2'] = $entry['language_fallback_2'];
+				$info_table = array(
+					'language_main' => $user_entry['language_main'],
+					'language_fallback_1' => $user_entry['language_fallback_1'],
+					'language_fallback_2' => $user_entry['language_fallback_2'],
+					'is_email_public' => $user_entry['is_email_public']
+				);
 
-				return '000' . json_encode($response);
+				$is_whitelisted = Whitelist\is_whitelisted($name);
+
+				if ($is_whitelisted || $user_entry['is_email_public'] == 1)
+					$info_table['email'] = $user_entry['email'];
+
+				if ($is_whitelisted) {
+					$info_table['IPs'] = array();
+
+					$req = $db->prepare('SELECT IP_address FROM user_IPs WHERE nick = ?');
+					$req->execute(array($requested_name));
+
+					while($entry = $req->fetch())
+						array_push($info_table['IPs'], $entry['IP_address']);
+				}
+
+				return '000' . json_encode($info_table);
 			});
 		});
 	});
