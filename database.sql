@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 19, 2017 at 04:01 PM
+-- Generation Time: Nov 20, 2017 at 08:44 PM
 -- Server version: 10.1.28-MariaDB
 -- PHP Version: 7.1.11
 
@@ -78,11 +78,12 @@ CREATE TABLE `global_moderators` (
 --
 
 CREATE TABLE `servers` (
-  `name` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `address` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `port` mediumint(8) UNSIGNED NOT NULL,
-  `ID` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Server informations, as displayed in the public list.';
+  `name` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `IP` varchar(39) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+  `password` text COLLATE utf8_bin NOT NULL,
+  `token` text CHARACTER SET ascii COLLATE ascii_bin,
+  `expiration_time` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Server authentication information';
 
 -- --------------------------------------------------------
 
@@ -153,8 +154,8 @@ ALTER TABLE `global_moderators`
 -- Indexes for table `servers`
 --
 ALTER TABLE `servers`
-  ADD PRIMARY KEY (`ID`),
-  ADD UNIQUE KEY `address` (`address`,`port`);
+  ADD PRIMARY KEY (`name`),
+  ADD KEY `IP` (`IP`);
 
 --
 -- Indexes for table `sessions`
@@ -185,12 +186,6 @@ ALTER TABLE `user_IPs`
 -- AUTO_INCREMENT for table `blacklist_entries`
 --
 ALTER TABLE `blacklist_entries`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `servers`
---
-ALTER TABLE `servers`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --

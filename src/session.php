@@ -40,7 +40,7 @@ function get_session($nick, $token = NULL) {
 	// Update the expiration time
 	$req = $db->prepare('UPDATE sessions SET expiration_time = DATE_ADD(NOW(), INTERVAL :expiration_time SECOND) WHERE nick = :nick');
 	$req->execute(array(
-		'expiration_time' => SESSION_EXPIRATION_TIME,
+		'expiration_time' => SESSION_EXPIRATION_DELAY,
 		'nick' => $nick
 	));
 
@@ -51,14 +51,14 @@ function session_exists($nick) {
 	return !is_int(get_session($nick));
 }
 
-function generate_token() {
+function generate_token($length) {
 	$token = "";
 	$codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	$codeAlphabet.= "abcdefghijklmnopqrstuvwxyz";
 	$codeAlphabet.= "0123456789";
 	$max = strlen($codeAlphabet);
 
-	for ($i=0; $i < SESSION_TOKEN_LENGTH; $i++) {
+	for ($i=0; $i < $length; $i++) {
 		$token .= $codeAlphabet[random_int(0, $max-1)];
 	}
 
@@ -69,16 +69,17 @@ function create_session($nick) {
 	global $db;
 
 	if (session_exists($nick)) {
-		return 1;
+		//return 1;
+		close_session($nick);
 	}
 
-	$token = generate_token();
+	$token = generate_token(SESSION_TOKEN_LENGTH);
 
 	$req = $db->prepare('INSERT INTO sessions(nick, token, expiration_time) VALUES(:nick, :token, DATE_ADD(NOW(), INTERVAL :expiration_time SECOND))');
 	$req->execute(array(
 		'nick' => $nick,
 		'token' => $token,
-		'expiration_time' => SESSION_EXPIRATION_TIME
+		'expiration_time' => SESSION_EXPIRATION_DELAY
 	));
 
 	return $token;
