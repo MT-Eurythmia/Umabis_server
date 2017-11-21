@@ -47,10 +47,6 @@ function get_session($nick, $token = NULL) {
 	return $session;
 }
 
-function session_exists($nick) {
-	return !is_int(get_session($nick));
-}
-
 function generate_token($length) {
 	$token = "";
 	$codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -65,21 +61,46 @@ function generate_token($length) {
 	return $token;
 }
 
-function create_session($nick) {
+// This function is not designed to be used outside this namespace.
+function session_exists($nick, $server_name) {
 	global $db;
 
-	if (session_exists($nick)) {
-		//return 1;
-		close_session($nick);
+	$req = $db->prepare('SELECT nick, token, UNIX_TIMESTAMP(expiration_time) as exp_time_UNIX, server FROM sessions WHERE nick = ?');
+	$req->execute(array($nick));
+	$session = $req->fetch();
+
+	if (empty($session))
+		return 0;
+
+	if ($session['exp_time_UNIX'] <= time()) {
+		// Do not close the session so the "session expired" error can be sent
+		return 0;
 	}
+
+	if ($session['server'] === $server_name) {
+		// This assumes that the function is called from create_session.
+		close_session($nick);
+		return 0;
+	}
+
+	return 1;
+}
+
+function create_session($nick, $server_name) {
+	global $db;
+
+	// Check if session already exists
+	if (session_exists($nick, $server_name))
+		return 1;
 
 	$token = generate_token(SESSION_TOKEN_LENGTH);
 
-	$req = $db->prepare('INSERT INTO sessions(nick, token, expiration_time) VALUES(:nick, :token, DATE_ADD(NOW(), INTERVAL :expiration_time SECOND))');
+	$req = $db->prepare('INSERT INTO sessions(nick, token, expiration_time, server) VALUES(:nick, :token, DATE_ADD(NOW(), INTERVAL :expiration_time SECOND), :server)');
 	$req->execute(array(
 		'nick' => $nick,
 		'token' => $token,
-		'expiration_time' => SESSION_EXPIRATION_DELAY
+		'expiration_time' => SESSION_EXPIRATION_DELAY,
+		'server' => $server_name
 	));
 
 	return $token;

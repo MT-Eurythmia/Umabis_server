@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 20, 2017 at 08:44 PM
+-- Generation Time: Nov 21, 2017 at 04:35 PM
 -- Server version: 10.1.28-MariaDB
 -- PHP Version: 7.1.11
 
@@ -78,7 +78,7 @@ CREATE TABLE `global_moderators` (
 --
 
 CREATE TABLE `servers` (
-  `name` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `name` varchar(535) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
   `IP` varchar(39) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `password` text COLLATE utf8_bin NOT NULL,
   `token` text CHARACTER SET ascii COLLATE ascii_bin,
@@ -94,7 +94,8 @@ CREATE TABLE `servers` (
 CREATE TABLE `sessions` (
   `token` varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `nick` varchar(535) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `expiration_time` datetime NOT NULL
+  `expiration_time` datetime NOT NULL,
+  `server` varchar(535) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -162,7 +163,8 @@ ALTER TABLE `servers`
 --
 ALTER TABLE `sessions`
   ADD PRIMARY KEY (`nick`),
-  ADD UNIQUE KEY `token` (`token`);
+  ADD UNIQUE KEY `token` (`token`),
+  ADD KEY `server` (`server`);
 
 --
 -- Indexes for table `users`
@@ -216,7 +218,8 @@ ALTER TABLE `global_moderators`
 -- Constraints for table `sessions`
 --
 ALTER TABLE `sessions`
-  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`nick`) REFERENCES `users` (`nick`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`nick`) REFERENCES `users` (`nick`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `sessions_ibfk_2` FOREIGN KEY (`server`) REFERENCES `servers` (`name`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user_IPs`

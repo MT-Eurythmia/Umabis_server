@@ -117,6 +117,7 @@ $app->path('api', function($request) use($app, $db) {
 				$hash = $request->post('hash');
 				$name = strtolower($request->post('name', ''));
 				$ip_address = $request->post('ip_address');
+				$server_name = $request->post('server_name');
 
 				// Check request validity
 				if (!$hash || !$name || !$ip_address)
@@ -156,7 +157,7 @@ $app->path('api', function($request) use($app, $db) {
 				}
 
 				// Create the session
-				$token = Session\create_session($user['nick']);
+				$token = Session\create_session($user['nick'], $server_name);
 				if ($token === 1) {
 					// User is already authenticated
 					return '003';
