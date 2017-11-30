@@ -2,6 +2,10 @@
 define('VERSION', '0.0.1');
 
 require __DIR__ . '/../vendor/autoload.php';
+
+if (!file_exists(__DIR__ . '/../src/config.php')) {
+	die('Configuration file not found! Please Refer to the documentation');
+}
 require __DIR__ . '/../src/config.php';
 
 try {
