@@ -28,6 +28,8 @@ server {
 	}
 ```
 
+We provide a Caddyfile for [Caddy](https://caddyserver.com) users.
+
 **Note that this example uses an HTTP scheme. In production, it is very important
 to use HTTPS.**
 
