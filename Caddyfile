@@ -1,17 +1,22 @@
 localhost:81 {
 	# compress stream
 	gzip
-	# access log file
+
+	# access and errors log file
 	log logs/access.log
-	# errors log file
 	errors logs/errors.log
 
-	# our root is in www/
+	# folder served by Caddy
 	root public/
+
 	# allow to list directories files
 	browse
+
 	# redirect .php files
-        fastcgi / /run/php-fpm/php-fpm.sock php
+	# you might access php-fpm through a port
+	# fastcgi / 127.0.0.1:9000 php
+    fastcgi / /run/php-fpm/php-fpm.sock php
+
 	# rewrite everything to /index.php
 	# the bullet framework needs the original URL to be given in the 'u'
 	# parameter of the GET request
